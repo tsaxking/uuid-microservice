@@ -6,7 +6,7 @@ const sqlite3 = require('sqlite3').verbose();
 const z = require('zod');
 const RandomOrg = require('random-org');
 
-const requiredEnvVars = ['API_KEY', 'HASHED_API_KEY', 'REDIS_NAME'];
+const requiredEnvVars = ['API_KEY', 'REDIS_NAME'];
 
 for (const varName of requiredEnvVars) {
     if (!process.env[varName]) {
@@ -39,7 +39,8 @@ const initDb = async () => {
 	db = await open({ filename: DB_PATH, driver: sqlite3.Database });
 	await db.exec(`
     CREATE TABLE IF NOT EXISTS random_ids (
-      id TEXT PRIMARY KEY
+      id TEXT PRIMARY KEY,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `);
 	console.log('[SQLite] DB ready');
@@ -69,7 +70,7 @@ const fetchUuidsFromDb = async (count) => {
 		);
 		totalServed += ids.length;
 	}
-	return ids;
+	return ids.map(id => id.id);
 };
 
 // -----------------------------
