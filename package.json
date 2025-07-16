@@ -21,9 +21,15 @@
   },
   "dependencies": {
     "concurrently": "^9.2.0",
+    "dotenv": "^17.2.0",
     "nodemon": "^3.1.10",
+    "random-org": "^2.2.0",
+    "redis": "^5.6.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
     "ts-utils": "github:tsaxking/global-ts-utilities",
-    "typescript-eslint": "^8.37.0"
+    "typescript-eslint": "^8.37.0",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@types/node": "^24.0.14"
