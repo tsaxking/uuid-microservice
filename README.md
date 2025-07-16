@@ -1,1 +1,1 @@
-# uuid-microservice
+# boilerplate-microservice
