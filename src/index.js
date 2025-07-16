@@ -21,7 +21,7 @@ for (const varName of requiredEnvVars) {
 const DB_PATH = './uuid.db';
 const MAX_STORED_IDS = 10000;
 const DAILY_REQUEST_LIMIT = 1000; // max per fetch call from random.org
-const FETCH_INTERVAL_MS = 60 * 60 * 1000; // fetch every hour
+const FETCH_INTERVAL_MS = 60 * 60 * 1000 * 24; // fetch every day
 
 let db;
 let _pub;
