@@ -1,0 +1,14 @@
+{
+	"scripts": {
+		"start": "node src/index.js"
+	},
+	"dependencies": {
+		"dotenv": "^17.2.0",
+		"random-org": "^2.2.0",
+		"redis": "^5.6.0",
+		"sqlite": "^5.1.1",
+		"sqlite3": "^5.1.7",
+		"uuid": "^11.1.0",
+		"zod": "^4.0.5"
+	}
+}
