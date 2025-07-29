@@ -1,4 +1,5 @@
 onlyBuiltDependencies:
+  - drizzle-struct
   - esbuild
-  - sqlite3
+  - math
   - ts-utils
