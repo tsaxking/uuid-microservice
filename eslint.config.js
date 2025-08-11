@@ -11,21 +11,11 @@ export default ts.config(
 	js.configs.recommended,
 	...ts.configs.recommended,
 	prettier,
-	...svelte.configs['flat/prettier'],
 	{
 		languageOptions: {
 			globals: {
 				...globals.browser,
 				...globals.node
-			}
-		}
-	},
-	{
-		files: ['**/*.svelte'],
-
-		languageOptions: {
-			parserOptions: {
-				parser: ts.parser
 			}
 		}
 	},
