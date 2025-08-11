@@ -11,23 +11,13 @@ export default ts.config(
 	js.configs.recommended,
 	...ts.configs.recommended,
 	prettier,
-	...svelte.configs['flat/prettier'],
 	{
 		languageOptions: {
 			globals: {
 				...globals.browser,
-				...globals.node
-			}
-		}
-	},
-	{
-		files: ['**/*.svelte'],
-
-		languageOptions: {
-			parserOptions: {
-				parser: ts.parser
-			}
-		}
+				...globals.node,
+			},
+		},
 	},
 	{
 		rules: {
@@ -35,8 +25,8 @@ export default ts.config(
 			'@typescript-eslint/no-this-alias': 'off',
 			'@typescript-eslint/no-unused-vars': [
 				'warn',
-				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
-			]
-		}
-	}
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+			],
+		},
+	},
 );
