@@ -1,0 +1,20 @@
+FROM node:22.12.0-bullseye
+
+# Install global dependencies first (rarely changes)
+RUN npm install -g pnpm@latest typescript
+
+WORKDIR /app
+
+# Copy only the files needed for install first, to cache dependencies better
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --frozen-lockfile
+
+# Then copy the rest of your source code
+COPY . .
+
+
+RUN pnpm build
+
+EXPOSE 3000
+CMD ["pnpm", "start"]
