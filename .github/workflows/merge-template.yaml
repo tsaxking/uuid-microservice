@@ -1,0 +1,77 @@
+name: 'Merge Template'
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  format:
+    uses: ./.github/workflows/format-check.yaml
+  unit-tests:
+    uses: ./.github/workflows/unit-test.yaml
+  docker-compose:
+    uses: ./.github/workflows/docker-compose-test.yml
+
+  merge-template:
+    runs-on: ubuntu-latest
+    needs: [format, unit-tests, docker-compose]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        templates:
+          [
+            'git@github.com:tsaxking/file-microservice.git',
+            'git@github.com:tsaxking/uuid-microservice.git',
+            'git@github.com:tsaxking/email-microservice.git',
+            'git@github.com:tsaxking/discord-bot-microservice.git',
+            'git@github.com:tsaxking/ntp-microservice.git'
+          ]
+
+    steps:
+      - name: Retrieve git dependencies
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Checkout everything to get access to the tags
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: 'Setup ssh-agent'
+        uses: 'webfactory/ssh-agent@v0.5.0'
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE }}
+
+      - name: Send pull-request
+        run: |
+          echo "Creating variables"
+          LATEST_TAG=$(git describe --tags --always --abbrev=0)
+          LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          REPOSITORY="${{ matrix.templates }}"
+          BRANCH_NAME="chore-update-scripts-to-$LATEST_TAG"
+          CLONE_DIR="target-repo"
+
+          echo "Cloning target repo"
+          git clone $REPOSITORY $CLONE_DIR
+          cd $CLONE_DIR
+
+          echo "Configuring Git"
+          git config user.email "taylorking206@u.boisestate.edu"
+          git config user.name "Sveltekit Bot"
+
+          echo "Creating new branch from default branch"
+          git checkout main
+          git pull origin main
+          git checkout -b "$BRANCH_NAME"
+
+          echo "Copying changes from template repo"
+          # Assuming the GHA starts in the template repo root
+          # Use rsync to copy everything from parent dir except target-repo
+          rsync -av --exclude "target-repo" --exclude ".git" ../ ./
+
+
+          echo "Committing and pushing changes"
+          git add .
+          git commit -m "chore: update scripts to $LATEST_TAG" || echo "No changes to commit"
+          git push origin "$BRANCH_NAME"

@@ -1,0 +1,87 @@
+name: docker-compose-test
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - '*'
+      - '!deploy'
+      - '!gh-pages'
+
+permissions:
+  contents: read
+
+jobs:
+  docker-compose-tests:
+    # this has a chance of infinite loop if we write a test wrong, timeout should catch it eventually.
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Initialize .docker.env
+        run: |
+          echo "DB_USER=test_user" > .docker.env
+          echo "DB_PASS=test" >> .docker.env
+          echo "DB_NAME=test" >> .docker.env
+          echo "DB_PORT=5432" >> .docker.env
+          cp .docker.env .env
+          echo "DB_HOST=db" >> .docker.env
+
+      - name: Start Docker build in background
+        run: docker compose --project-name test build app &
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: v22.12.0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
+      - name: Install Dependencies
+        run: pnpm i
+
+      - name: Set up Postgres
+        run: |
+          docker compose --project-name test up -d db
+          docker exec db bash -c '
+            for i in $(seq 1 15); do
+              pg_isready -U admin && exit 0
+              sleep 1
+            done
+            echo "Postgres did not become ready in time" >&2
+            exit 1
+          '
+          docker exec db psql -U admin -c "CREATE ROLE test_user WITH LOGIN PASSWORD 'test';"
+          docker exec db psql -U admin -c "CREATE DATABASE test WITH OWNER test_user;"
+          docker exec db psql -U admin -c "GRANT admin TO test_user;"
+
+          cp .env .cp
+          echo "DB_HOST=localhost" >> .env
+
+          pnpm db:migrate
+          pnpm db:push --force
+
+          rm .env
+          cp .cp .env
+          rm .cp
+          echo "DB_HOST=db" >> .env
+
+      - name: Wait for build to finish
+        run: wait
+
+      - name: Start App
+        run: |
+          docker compose --project-name test up -d app redis
+          pnpm test:integration
+
+      - name: Stop Application
+        run: docker compose --project-name test down -v
