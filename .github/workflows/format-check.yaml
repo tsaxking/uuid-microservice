@@ -1,0 +1,40 @@
+name: Format & Lint
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!deploy'
+      - '!gh-pages'
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  format_and_lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve git dependencies
+        uses: actions/checkout@v3
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: v22.12.0
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          pnpm install --frozen-lockfile
+
+      - name: Run
+        run: |
+          echo "Running formatter..."
+          pnpm run format
+          pnpm run lint

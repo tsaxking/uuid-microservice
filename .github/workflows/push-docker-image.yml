@@ -1,0 +1,60 @@
+name: 'Push Docker Image'
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      TAG: ${{ steps.set-tag.outputs.TAG }}
+    steps:
+      - name: Ensure this is a tagged commit
+        id: set-tag
+        run: |
+          if [[ "${GITHUB_REF}" != refs/tags/* ]]; then
+            echo "Error: Workflow only runs on tagged commits."
+            exit 1
+          fi
+          # strip refs/tags/ and output for downstream jobs
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+
+  format:
+    needs: pre-check
+    uses: ./.github/workflows/code-formatter.yml
+
+  unit-tests:
+    needs: pre-check
+    uses: ./.github/workflows/testing-unit.yml
+
+  E2E:
+    needs: pre-check
+    uses: ./.github/workflows/testing-e2e.yml
+
+  check:
+    needs: pre-check
+    uses: ./.github/workflows/testing-svelte-check.yml
+
+  docker-compose:
+    needs: pre-check
+    uses: ./.github/workflows/docker-compose-test.yml
+
+  push-docker-image:
+    runs-on: ubuntu-latest
+    needs: [format, unit-tests, E2E, check, docker-compose]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Retrieve credentials and push image
+        run: |
+          TAG=${{ needs.pre-check.outputs.TAG }}
+          NAME=$(basename $GITHUB_REPOSITORY)
+
+          echo ${{ secrets.GITEA_REGISTRY_PWD }} | docker login ${{ secrets.GITEA_REGISTRY_URL }} -u ${{ secrets.GITEA_REGISTRY_USER }} --password-stdin
+          docker build -t my-image:latest .
+          docker tag my-image:latest ${{ secrets.GITEA_REGISTRY_URL }}/$NAME:$TAG
+          docker push ${{ secrets.GITEA_REGISTRY_URL }}/$NAME:$TAG
