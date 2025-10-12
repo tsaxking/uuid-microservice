@@ -27,6 +27,7 @@ jobs:
       - name: Initialize .docker.env
         run: |
           cp config.example.json config.json
+          cp .env.example .docker.env
           cp .docker.env .env
           echo "DB_HOST=db" >> .docker.env
 
