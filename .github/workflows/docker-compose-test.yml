@@ -26,10 +26,7 @@ jobs:
 
       - name: Initialize .docker.env
         run: |
-          echo "DB_USER=test_user" > .docker.env
-          echo "DB_PASS=test" >> .docker.env
-          echo "DB_NAME=test" >> .docker.env
-          echo "DB_PORT=5432" >> .docker.env
+          cp config.example.json config.json
           cp .docker.env .env
           echo "DB_HOST=db" >> .docker.env
 
@@ -60,9 +57,9 @@ jobs:
             echo "Postgres did not become ready in time" >&2
             exit 1
           '
-          docker exec db psql -U admin -c "CREATE ROLE test_user WITH LOGIN PASSWORD 'test';"
-          docker exec db psql -U admin -c "CREATE DATABASE test WITH OWNER test_user;"
-          docker exec db psql -U admin -c "GRANT admin TO test_user;"
+          docker exec db psql -U admin -c "CREATE ROLE username WITH LOGIN PASSWORD 'password';"
+          docker exec db psql -U admin -c "CREATE DATABASE db WITH OWNER username;"
+          docker exec db psql -U admin -c "GRANT admin TO username;"
 
           cp .env .cp
           echo "DB_HOST=localhost" >> .env
