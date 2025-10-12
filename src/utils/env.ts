@@ -1,7 +1,10 @@
-import { config } from 'dotenv';
+import { config as dotenv } from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-config();
+import { attemptAsync } from 'ts-utils/check';
+import z from 'zod';
+import configSchema from './config';
+dotenv();
 
 const keys = new Map<
 	string,
@@ -21,6 +24,16 @@ export class EnvironmentError extends Error {
 	}
 }
 
+export const config = (() => {
+	if (!fs.existsSync(path.join(process.cwd(), 'config.json'))) {
+		throw new EnvironmentError('config.json does not exist');
+	}
+	let json = fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8');
+	// remove single line comments and multi-line comments
+	json = json.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+	return configSchema.parse(JSON.parse(json));
+})();
+
 type EnvConfig<T> = {
 	required?: boolean;
 	default?: T;
@@ -33,17 +46,15 @@ type EnvConfig<T> = {
 let timeout: ReturnType<typeof setTimeout>;
 
 const filepath = path.join(process.cwd(), '.env.example');
-let current = ''; 
+let current = '';
 try {
 	current = fs.readFileSync(filepath, 'utf-8');
 } catch {
 	console.log('.env.example does not exist, will create it automatically');
 }
 
-export const env = get<'dev' | 'prod' | 'test'>('ENVIRONMENT', {
-	values: ['dev', 'prod', 'test'],
-	required: true
-});
+export const env = config.environment;
+
 function generateExample() {
 	if (timeout) clearTimeout(timeout);
 	timeout = setTimeout(async () => {
@@ -169,10 +180,24 @@ export function str(key: string, required: boolean): string | undefined {
 	return get<string>(key, { required: required ?? false });
 }
 
-export function domain(config: { port: boolean; protocol: boolean }) {
-	const host = str('PUBLIC_DOMAIN', true);
-	const port = num('PORT', true);
-	const protocol = bool('HTTPS', true) ? 'https://' : 'http://';
+export function domain(domainConfig: { port: boolean; protocol: boolean }) {
+	const host = config.network?.host;
+	const port = config.network?.port;
+	const protocol = config.network?.protocol + '://';
 
-	return `${config.protocol ? protocol : ''}${host}${config.port ? `:${port}` : ''}`;
+	return `${domainConfig.protocol ? protocol : ''}${host}${domainConfig.port ? `:${port}` : ''}`;
 }
+
+export const getPublicIp = () => {
+	return attemptAsync(async () => {
+		const res = await fetch('https://api.ipify.org?format=json');
+		if (!res.ok) throw new Error('Failed to fetch public IP');
+		return z
+			.object({
+				ip: z.string().ip({
+					version: 'v4'
+				})
+			})
+			.parse(await res.json()).ip;
+	});
+};
