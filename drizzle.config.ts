@@ -2,7 +2,7 @@ import { defineConfig } from 'drizzle-kit';
 import { config } from './src/utils/env';
 
 export default defineConfig({
-	schema: './src/lib/server/structs/*.ts',
+	schema: './src/structs/*.ts',
 
 	dbCredentials: {
 		host: config.database.host,
