@@ -109,4 +109,3 @@ jobs:
           git add .
           git commit --allow-empty -m "chore: update scripts to $LATEST_TAG"
           git push origin --set-upstream $BRANCH_NAME
-

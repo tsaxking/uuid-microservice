@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsc && pnpm post-build",
-		"start": "node dist/index.js",
+		"start": "node src/main.js",
 		"build:watch": "tsc --watch --preserveWatchOutput",
 		"start:watch": "nodemon dist/index.js",
 		"format": "prettier --write .",
@@ -47,7 +47,7 @@
 		"postgres": "^3.4.7",
 		"prettier": "^3.6.2",
 		"redis": "^5.6.0",
-		"ts-utils": "github:tsaxking/global-ts-utilities#v1.0.0",
+		"ts-utils": "github:tsaxking/global-ts-utilities#v1.0.3",
 		"redis-utils": "github:tsaxking/redis#v2.0.7",
 		"typescript-eslint": "^8.37.0",
 		"uuid": "^11.1.0",

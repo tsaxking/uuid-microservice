@@ -1,0 +1,33 @@
+{
+	"environment": "dev",
+	"app_name": "Your App Name",
+	"network": {
+		"host": "localhost",
+		"port": 3000,
+		"protocol": "http"
+	},
+	"database": {
+		"port": 5432,
+		"host": "localhost",
+		"user": "username",
+		"pass": "password",
+		"name": "db"
+	},
+	"redis": {
+		"url": "redis://localhost:6379",
+		"name": "your_redis_name"
+	},
+	"logs": {
+		"enabled": true,
+		"outdir": "logs",
+		"level": ["info", "error", "warn"]
+	},
+	"email": {
+		"queue_name": "email_queue",
+		"max_size": 100,
+		"support_email": "someemail@email.com"
+	},
+	"ntp": {
+		"server": "ntp_server_name"
+	}
+}

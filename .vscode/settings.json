@@ -1,0 +1,62 @@
+{
+	"colorMyText.configurations": [
+		{
+			"paths": ["*.html", "*.mjml", "*.md"],
+			"rules": [
+				{
+					"patterns": [
+						// all data in {{ }}, but not including the {{ }}
+						"\\{\\{ [^}]+\\}\\}"
+					],
+					"color": "BrightGreen"
+				},
+				{
+					// All <repeat> tags
+					"patterns": [
+						"<repeat[^>]*>",
+						"</repeat>",
+						"<if[^>]*>",
+						"</if>",
+						"<file[^>]*>",
+						"</file>",
+						"<switch[^>]*>",
+						"</switch>"
+					],
+					"color": "Magenta"
+				},
+				{
+					"patterns": [
+						"<case[^>]*>",
+						"</case>",
+						"<default[^>]*>",
+						"</default>",
+						"<else[^>]*>",
+						"</else>",
+						"<elseif[^>]*>",
+						"</elseif>"
+					],
+					"color": "Green"
+				}
+			]
+		},
+		{
+			"paths": ["*.pages"],
+			"rules": [
+				{
+					"patterns": [
+						// everything after # is a comment
+						"#.*"
+					],
+					"color": "Green"
+				}
+			]
+		}
+	],
+	"liveServer.settings.port": 5501,
+	"json.schemas": [
+		{
+			"fileMatch": ["config.json", "config.example.json", "config.docker.json"],
+			"url": "./config/config.schema.json"
+		}
+	]
+}

@@ -1,0 +1,144 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"type": "object",
+	"properties": {
+		"environment": {
+			"type": "string",
+			"enum": ["dev", "prod", "test"],
+			"description": "Application environment"
+		},
+		"app_name": {
+			"type": "string",
+			"description": "Name of the application"
+		},
+		"network": {
+			"description": "Network configuration",
+			"type": "object",
+			"properties": {
+				"host": {
+					"type": "string",
+					"description": "Server host"
+				},
+				"port": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 65535,
+					"description": "Server port"
+				},
+				"protocol": {
+					"type": "string",
+					"enum": ["http", "https"],
+					"description": "Protocol to use"
+				}
+			},
+			"required": ["host", "port", "protocol"],
+			"additionalProperties": false
+		},
+		"database": {
+			"description": "Database configuration",
+			"type": "object",
+			"properties": {
+				"port": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 65535,
+					"description": "Database port"
+				},
+				"host": {
+					"type": "string",
+					"description": "Database host"
+				},
+				"user": {
+					"type": "string",
+					"description": "Database username"
+				},
+				"pass": {
+					"type": "string",
+					"description": "Database password"
+				},
+				"name": {
+					"type": "string",
+					"description": "Database name"
+				}
+			},
+			"required": ["port", "host", "user", "pass", "name"],
+			"additionalProperties": false
+		},
+		"redis": {
+			"description": "Redis configuration",
+			"type": "object",
+			"properties": {
+				"url": {
+					"type": "string",
+					"format": "uri",
+					"description": "Redis connection URL"
+				},
+				"name": {
+					"type": "string",
+					"description": "Redis instance name"
+				}
+			},
+			"required": ["url", "name"],
+			"additionalProperties": false
+		},
+		"logs": {
+			"description": "Logging configuration",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"type": "boolean",
+					"description": "Whether logging is enabled"
+				},
+				"outdir": {
+					"type": "string",
+					"description": "Directory for log files"
+				},
+				"level": {
+					"description": "Log levels (to be handled separately)",
+					"type": "array",
+					"items": {
+						"enum": ["trace", "debug", "info", "warn", "error", "fatal", "silent", "struct"]
+					}
+				}
+			},
+			"required": ["outdir", "level"],
+			"additionalProperties": false
+		},
+		"email": {
+			"description": "Email service configuration",
+			"type": "object",
+			"properties": {
+				"queue_name": {
+					"type": "string",
+					"description": "Name of the email queue"
+				},
+				"max_size": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "Maximum queue size"
+				},
+				"support_email": {
+					"type": "string",
+					"format": "email",
+					"description": "Support email address"
+				}
+			},
+			"required": ["queue_name", "max_size", "support_email"],
+			"additionalProperties": false
+		},
+		"ntp": {
+			"description": "NTP server configuration",
+			"type": "object",
+			"properties": {
+				"server": {
+					"type": "string",
+					"description": "NTP server name or address"
+				}
+			},
+			"required": ["server"],
+			"additionalProperties": false
+		}
+	},
+	"required": ["environment", "app_name", "redis", "logs", "ntp"],
+	"additionalProperties": false
+}
