@@ -4,6 +4,7 @@ import path from 'path';
 import { attemptAsync } from 'ts-utils/check';
 import z from 'zod';
 import configSchema from './config';
+import { stripJsonComments } from './files';
 dotenv();
 
 const keys = new Map<
@@ -29,8 +30,7 @@ export const config = (() => {
 		throw new EnvironmentError('config.json does not exist');
 	}
 	let json = fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8');
-	// remove single line comments and multi-line comments
-	json = json.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+	json = stripJsonComments(json);
 	return configSchema.parse(JSON.parse(json));
 })();
 
